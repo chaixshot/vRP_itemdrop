@@ -3,7 +3,7 @@
 ------------------------]]--
 
 local KeyMarker = {1, 18}
-local KeyMarkerName = "ENTER"
+local KeyMarkerName = "~INPUT_ENTER~"
 
 local text_take = 'Pick up items ['..KeyMarkerName..']'
 
@@ -14,7 +14,7 @@ local dropList = {}
 function scenrionahoi(text)
 	SetTextComponentFormat('STRING')
 	AddTextComponentString(text)
-	DisplayHelpTextFromStringLabel(0, false, false, -1)
+	DisplayHelpTextFromStringLabel(0, 0, 1, -1)
 end
 
 
@@ -53,12 +53,27 @@ function SetBagOnGround()
  return network
 end
 
+function HighlightObject(object)
+    x, y, z = table.unpack(GetEntityCoords(object, true))
+    SetDrawOrigin(x, y, z, 0)
+    RequestStreamedTextureDict("helicopterhud", false)
+    DrawSprite("helicopterhud", "hud_corner", -0.01, -0.01, 0.006, 0.006, 0.0, 0, 255, 0, 255)
+    DrawSprite("helicopterhud", "hud_corner", 0.01, -0.01, 0.006, 0.006, 90.0, 0, 255, 0, 255)
+    DrawSprite("helicopterhud", "hud_corner", -0.01, 0.01, 0.006, 0.006, 270.0, 0, 255, 0, 255)
+    DrawSprite("helicopterhud", "hud_corner", 0.01, 0.01, 0.006, 0.006, 180.0, 0, 255, 0, 255)
+    ClearDrawOrigin()
+end
+
 Citizen.CreateThread(function()
   while true do
     Citizen.Wait(0)
     local ped = GetPlayerPed(-1)
     local pedCoord = GetEntityCoords(ped)
     for k,v in pairs(dropList) do
+				
+	BagHighlight = GetClosestObjectOfType(pedCoord["x"], pedCoord["y"], pedCoord["z"], 40.0, GetHashKey("prop_paper_bag_small"), false, false, false)
+	HighlightObject(BagHighlight)
+				
       if DoesObjectOfTypeExistAtCoords(pedCoord["x"], pedCoord["y"], pedCoord["z"], 1.3, GetHashKey("prop_paper_bag_small"), true) then
         Bag = GetClosestObjectOfType(pedCoord["x"], pedCoord["y"], pedCoord["z"], 1.3, GetHashKey("prop_paper_bag_small"), false, false, false)
         if NetworkGetNetworkIdFromEntity(Bag) == k then
